@@ -5,6 +5,66 @@ title: "Release notes"
 
 <!-- TOC -->
 
+## Version 1.12
+
+#### 🧟‍♂️ Introducing Playwright Trace Viewer
+
+[Playwright Trace Viewer](./trace-viewer.md) is a new GUI tool that helps exploring recorded Playwright traces after the script ran. Playwright traces let you examine:
+- page DOM before and after each Playwright action
+- page rendering before and after each Playwright action
+- browser network during script execution
+
+Traces are recorded using the new [`property: BrowserContext.tracing`] API:
+
+```python
+browser = chromium.launch()
+context = browser.new_context()
+
+# Start tracing before creating / navigating a page.
+context.tracing.start(screenshots=True, snapshots=True)
+
+page.goto("https://playwright.dev")
+
+# Stop tracing and export it into a zip archive.
+context.tracing.stop(path = "trace.zip")
+```
+
+Traces are examined later with the Playwright CLI:
+
+
+```sh
+playwright show-trace trace.zip
+```
+
+That will open the following GUI:
+
+![image](https://user-images.githubusercontent.com/746130/121109654-d66c4480-c7c0-11eb-8d4d-eb70d2b03811.png)
+
+👉 Read more in [trace viewer documentation](./trace-viewer.md).
+
+
+#### Browser Versions
+
+- Chromium 93.0.4530.0
+- Mozilla Firefox 89.0
+- WebKit 14.2
+
+This version of Playwright was also tested against the following stable channels:
+
+- Google Chrome 91
+- Microsoft Edge 91
+
+#### New APIs
+
+- `reducedMotion` option in [`method: Page.emulateMedia`], [`method: BrowserType.launchPersistentContext`], [`method: Browser.newContext`] and [`method: Browser.newPage`]
+- [`event: BrowserContext.request`]
+- [`event: BrowserContext.requestFailed`]
+- [`event: BrowserContext.requestFinished`]
+- [`event: BrowserContext.response`]
+- `tracesDir` option in [`method: BrowserType.launch`] and [`method: BrowserType.launchPersistentContext`]
+- new [`property: BrowserContext.tracing`] API namespace
+- new [`method: Download.page`] method
+
 ## Version 1.11
 
 🎥  New video: [Playwright: A New Test Automation Framework for the Modern Web](https://youtu.be/_Jla6DyuEu4) ([slides](https://docs.google.com/presentation/d/1xFhZIJrdHkVe2CuMKOrni92HoG2SWslo0DhJJQMR1DI/edit?usp=sharing))
