@@ -37,8 +37,9 @@ These options would be typically different between local development and CI oper
   - `'never'` - do not preserve output for any tests;
   - `'failures-only'` - only preserve output for failed tests.
 - `projects: Project[]` - Multiple [projects](#projects) configuration.
-- `reporter: 'list' | 'line' | 'dot' | 'json' | 'junit'` - The reporter to use. See [reporters](./test-reporters.md) for details.
 - `quiet: boolean` - Whether to suppress stdout and stderr from the tests.
+- `reporter: 'list' | 'line' | 'dot' | 'json' | 'junit'` - The reporter to use. See [reporters](./test-reporters.md) for details.
+- `reportSlowTests: { max: number, threshold: number } | null` - Whether to report slow tests. When `null`, slow tests are not reported. Otherwise, tests that took more than `threshold` milliseconds are reported as slow, but no more than `max` number of them. Passing zero as `max` reports all slow tests that exceed the threshold.
 - `shard: { total: number, current: number } | null` - [Shard](./test-parallel.md#shards) information.
 - `updateSnapshots: boolean` - Whether to update expected snapshots with the actual results produced by the test run.
 - `workers: number` - The maximum number of concurrent worker processes to use for parallelizing tests.
@@ -119,7 +120,7 @@ In addition to everything from the [`workerInfo`](#workerinfo), the following in
 - `annotations` - [Annotations](./test-annotations.md) that were added to the test.
 - `snapshotSuffix: string` - Suffix used to locate snapshots for the test.
 - `snapshotPath(snapshotName: string)` - Function that returns the full path to a particular snapshot for the test.
-- `outputDir: string` - Absolute path to the output directory for this test run.
+- `outputDir: string` - Path to the output directory for this test run.
 - `outputPath(...pathSegments: string[])` - Function that returns the full path to a particular output artifact for the test.
 
 The following information is accessible after the test body has finished, in fixture teardown:
