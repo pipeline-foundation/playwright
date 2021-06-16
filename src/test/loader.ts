@@ -99,6 +99,7 @@ export class Loader {
     this._fullConfig.maxFailures = takeFirst(this._configOverrides.maxFailures, this._config.maxFailures, baseFullConfig.maxFailures);
     this._fullConfig.preserveOutput = takeFirst<PreserveOutput>(this._configOverrides.preserveOutput, this._config.preserveOutput, baseFullConfig.preserveOutput);
     this._fullConfig.reporter = takeFirst(toReporters(this._configOverrides.reporter), toReporters(this._config.reporter), baseFullConfig.reporter);
+    this._fullConfig.reportSlowTests = takeFirst(this._configOverrides.reportSlowTests, this._config.reportSlowTests, baseFullConfig.reportSlowTests);
     this._fullConfig.quiet = takeFirst(this._configOverrides.quiet, this._config.quiet, baseFullConfig.quiet);
     this._fullConfig.shard = takeFirst(this._configOverrides.shard, this._config.shard, baseFullConfig.shard);
     this._fullConfig.updateSnapshots = takeFirst(this._configOverrides.updateSnapshots, this._config.updateSnapshots, baseFullConfig.updateSnapshots);
@@ -187,10 +188,13 @@ export class Loader {
     let testDir = takeFirst(projectConfig.testDir, rootDir);
     if (!path.isAbsolute(testDir))
       testDir = path.resolve(rootDir, testDir);
-
+    let outputDir = takeFirst(this._configOverrides.outputDir, projectConfig.outputDir, this._config.outputDir, path.resolve(process.cwd(), 'test-results'))
+    if (!path.isAbsolute(outputDir))
+      outputDir = path.resolve(rootDir, outputDir);
     const fullProject: FullProject = {
       define: takeFirst(this._configOverrides.define, projectConfig.define, this._config.define, []),
-      outputDir: takeFirst(this._configOverrides.outputDir, projectConfig.outputDir, this._config.outputDir, path.resolve(process.cwd(), 'test-results')),
+      expect: takeFirst(this._configOverrides.expect, projectConfig.expect, this._config.expect, undefined),
+      outputDir,
       repeatEach: takeFirst(this._configOverrides.repeatEach, projectConfig.repeatEach, this._config.repeatEach, 1),
       retries: takeFirst(this._configOverrides.retries, projectConfig.retries, this._config.retries, 0),
       metadata: takeFirst(this._configOverrides.metadata, projectConfig.metadata, this._config.metadata, undefined),
@@ -294,6 +298,15 @@ function validateConfig(config: Config) {
     }
   }
 
+  if ('reportSlowTests' in config && config.reportSlowTests !== undefined && config.reportSlowTests !== null) {
+    if (!config.reportSlowTests || typeof config.reportSlowTests !== 'object')
+      throw new Error(`config.reportSlowTests must be an object`);
+    if (!('max' in config.reportSlowTests) || typeof config.reportSlowTests.max !== 'number' || config.reportSlowTests.max < 0)
+      throw new Error(`config.reportSlowTests.max must be a non-negative number`);
+    if (!('threshold' in config.reportSlowTests) || typeof config.reportSlowTests.threshold !== 'number' || config.reportSlowTests.threshold < 0)
+      throw new Error(`config.reportSlowTests.threshold must be a non-negative number`);
+  }
+
   if ('shard' in config && config.shard !== undefined && config.shard !== null) {
     if (!config.shard || typeof config.shard !== 'object')
       throw new Error(`config.shard must be an object`);
@@ -336,8 +349,6 @@ function validateProject(project: Project, title: string) {
   if ('outputDir' in project && project.outputDir !== undefined) {
     if (typeof project.outputDir !== 'string')
       throw new Error(`${title}.outputDir must be a string`);
-    if (!path.isAbsolute(project.outputDir))
-      throw new Error(`${title}.outputDir must be an absolute path`);
   }
 
   if ('repeatEach' in project && project.repeatEach !== undefined) {
@@ -395,6 +406,7 @@ const baseFullConfig: FullConfig = {
   preserveOutput: 'always',
   projects: [],
   reporter: [ ['list'] ],
+  reportSlowTests: null,
   rootDir: path.resolve(process.cwd()),
   quiet: false,
   shard: null,

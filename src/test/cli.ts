@@ -30,6 +30,7 @@ const jsConfig = 'playwright.config.js';
 const defaultConfig: Config = {
   preserveOutput: process.env.CI ? 'failures-only' : 'always',
   reporter: [ [defaultReporter] ],
+  reportSlowTests: { max: 5, threshold: 15000 },
   timeout: defaultTimeout,
   updateSnapshots: process.env.CI ? 'none' : 'missing',
   workers: Math.ceil(require('os').cpus().length / 2),
@@ -136,7 +137,7 @@ function forceRegExp(pattern: string): RegExp {
   const match = pattern.match(/^\/(.*)\/([gi]*)$/);
   if (match)
     return new RegExp(match[1], match[2]);
-  return new RegExp(pattern, 'g');
+  return new RegExp(pattern, 'gi');
 }
 
 function overridesFromOptions(options: { [key: string]: any }): Config {
